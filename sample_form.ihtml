@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional //EN"
+          "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+ <head>
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="content-language" content="en">
+  <meta name="description" content="Sample Feedback Page">
+  <meta name="keywords"    content="sample, feedback, page, hmailer">
+  <meta name="robots"      content="NOINCLUDE, NOFOLLOW">
+  <meta name="author"      content="Public Domain">
+  <meta name="copyright"   content="2001, Public Domian">
+  <meta name="rating"      content="general">
+  <meta name="generator"   content="Elvis (vi clone)">
+  <title>Feedback</title>
+  <base href="http://norp5424b.hsc.usc.edu/test-hm/default.php">
+  <link rev="made" href="mailto:webmaster@norp5424b.hsc.usc.edu">
+  <!-- link rel="stylesheet" href="/sample.css" -->
+ </head>
+
+ <body>
+  <p><font size="+1"><b>Your feedback is appreciated</b></font><br>
+   Your feedback helps us improve our website.  You may use the space
+   below to provide us with your comments.  Replies are not automatic.
+   If you would like a reply, it is best to ask for one in your comment.
+  </p>
+  <p>
+   Your name is optional.<br>
+   Your e-mail address is needed only if you want us to reply.
+  </p>
+<?php print( $errormsg ); ?>
+  <!-- form name="feedback" align="center" method="post"
+       action="http://norp5424b.hsc.usc.edu/test-hm/default.php" -->
+  <form name="feedback" align="center" method="post"
+       action="http://norp5424b.hsc.usc.edu/test-hm/default.php">
+  <table border="0" cellspacing="0" cellpadding="4">
+   <tr valign="top" align="left">
+    <td>Your name:&nbsp;</td>
+    <td><input 
+        type="text" name="visitor_name" 
+        <?php print( 'visitor="' . $vistor_name . '"' ); ?>
+        size="45" maxlength="64"></td>
+   </tr>
+  
+   <tr valign="top" align="left">
+    <td>E-mail address:&nbsp;</td>
+    <td><input 
+        type="text" name="visitor_email" 
+        <?php print( 'visitor="' . $vistor_email . '"' ); ?>
+        size="45" maxlength="64"></td>
+   </tr>
+  </table>
+  
+  <table border="0" cellspacing="0" cellpadding="4">
+   <tr>
+    <td colspan="2">
+    <textarea cols="60" rows="10" name="visitor_comment"><?php print( $vistor_comment ); ?></textarea></td>
+   </tr>
+  
+   <tr>
+    <td align="right"><input 
+        type="reset" name="resetbtn" value="Reset">
+      <input
+        type="submit" name="submitbtn" value="Submit">
+    </td>
+   </tr>
+  </table>
+  </form>
+ </body>
+</html>

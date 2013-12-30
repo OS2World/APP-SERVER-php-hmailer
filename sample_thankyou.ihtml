@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional //EN"
+          "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+ <head>
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="content-language" content="en">
+  <meta name="description" content="Sample Feedback Page">
+  <meta name="keywords"    content="sample, feedback, page, hmailer">
+  <meta name="robots"      content="NOINCLUDE, NOFOLLOW">
+  <meta name="author"      content="Public Domain">
+  <meta name="copyright"   content="2001, Public Domian">
+  <meta name="rating"      content="general">
+  <meta name="generator"   content="Elvis (vi clone)">
+  <title>Feedback</title>
+  <base href="http://norp5424b.hsc.usc.edu/test-hm/default.php">
+  <link rev="made" href="mailto:webmaster@norp5424b.hsc.usc.edu">
+  <!-- link rel="stylesheet" href="/sample.css" -->
+ </head>
+
+ <body>
+  <p>Thank you for your feedback.<br>
+  <?php print( $lhm->last_result ); ?></p>
+ </body>
+</html>

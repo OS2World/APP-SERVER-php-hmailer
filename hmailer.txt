@@ -1,0 +1,528 @@
+Documentation for hmailer.php, version 2.1.
+
+This file, together with HMailer.php, is released into the public domain.
+
+This file and the associated HMailer.php is distributed WITHOUT ANY
+EXPLICIT OR IMPLIED WARRANTY of any sort.  For example (but not limited
+to this example), there is NO WARRANTY, EXPLICIT OR IMPLIED, OF ANY
+MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE.
+
+VERY LITTLE TESTING HAS BEEN DONE; USE AT YOUR OWN RISK.
+
+All trademarks are owned by their respective companies.
+
+
+Class HMailer
+=============
+HMailer is a PHP class which uses HMailer.exe from an Inet.Mail or
+Inet.Mail Pro sofware installation to send an e-mail message.  Inet.Mail
+is an OS/2 only program, and so is useless (at least without modification)
+on all other platforms.
+
+If you are using Inet.Mail for smtpd service, you will likely have
+some difficulty using sendmail to send e-mail to the local domain.
+In particular, you will need to write a Local Delivery Agent and configure
+sendmail to use it.  This class helps you use HMailer instead, thus
+solving the problem.
+
+E-mail attachments are now supported by this class.
+
+Very little testing was done, use at your own risk.
+
+WARNING  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING  
+======================================================================
+This class does very little error checking.  You are particularly
+responsible for performing your own error checks of the following items.
+
+Message Subject
+---------------
+Make sure that it contains no control characters AND ESPECIALLY NO \n
+OR \r CHARACTERS.  Make sure that it is not excessively long.  IT IS
+ESPECIALLY IMPORTANT TO TAKE THIS SERIOUSLY WHEN ACCEPTING E-MAIL
+INFORMATION AS FORMS DATA.
+
+Message Body
+------------
+Make sure that it contains nothing that does not belong in an e-mail
+message such as Visual Basic Scripts, or other Microsoft Outlook
+(known in some circles as the Microsoft Email Virus Enabler) gotchas.
+The HMailer class will silently add a terminating \n character if it does
+not already have one.  Otherwise, the recipients would not see the last
+line of the message.  It is ESPECIALLY IMPORTANT TO TAKE THIS SERIOUSLY
+WHEN ACCEPTING E-MAIL INFORMATION AS FORMS DATA.
+
+E-mail addresses
+----------------
+Make sure that your e-mail addresses are valid.  The HMailer class makes
+sure that it contains no control characters or quotation marks.
+
+The sender's e-mail address appears on the HMailer.exe command line.
+HMailer.exe sometimes calls sendmail and may put recipient addresses on the
+sendmail command line.  Because of this, all e-mail addresses are checked
+for ampersands, and pipe and redirection characters.  Address containing
+such characters are rejected.
+
+Any additional error checking is your responsibility.  IT IS ESPECIALLY
+IMPORTANT TO TAKE THIS SERIOUSLY WHEN ACCEPTING E-MAIL INFORMATION AS
+FORMS DATA.
+
+E-mail recipient names
+----------------------
+The HMailer class will use the recipient's real name, if specified,
+as part of the header information.  It will take the same precautions
+as with E-mail addresss EXCEPT that all single and double quotation
+marks are backslash escaped.  However, there are probably additional
+checks you should do yourself.  IT IS ESPECIALLY IMPORTANT TO TAKE THIS
+SERIOUSLY WHEN ACCEPTING E-MAIL INFORMATION AS FORMS DATA.
+
+Additional headers
+------------------
+There is absolutely NO safety or other validity checking done on
+additional headers.  The additional header information MUST be a
+concatenation of strings each of which is of the format "Header-Name:
+Header value\n".  IT IS ESPECIALLY IMPORTANT TO TAKE THIS SERIOUSLY WHEN
+ACCEPTING E-MAIL INFORMATION AS FORMS DATA.
+
+Attachemnts
+-----------
+There are absolutely NO safety checks and only the most minimal
+validity check.  You are responsible for making sure your attachemnt
+specifications are valid and not do not contain viruses, trojan horses,
+or the like.  The hmailer class does base64 encoding.  For 7bit and 8bit
+encodings, you are responsible for making sure your data is correct.
+IT IS ESPECIALLY IMPORTANT TO TAKE THIS SERIOUSLY WHEN ACCEPTING E-MAIL
+INFORMATION AS FORMS DATA.
+
+Note that sending attachments is an inherently slow process, especially
+when sending to mutiple recipients.  You may run up against your PHP
+max_execution_time setting.
+
+Environment Variables
+=====================
+The HMailer class can make use of some environment variables.
+
+TMPDIR
+TMP
+TEMP
+------
+HMailer.exe requires that some information be passed to it by means
+of temporary files.  If one of these environment variables are set,
+then the HMailer class can use it as specifying the location of these
+temporary files.  These environment variables checked in the order given.
+To override using environment variables for this purpose, see the
+Configuration section below.
+
+HMAILER
+-------
+If set, then HMailer uses looks for HMailer.exe in this directory.
+Note that this environment variable specifies the path only; the name
+'HMailer.exe' is assumed.
+
+The HMAILER environment variable is used by HMailer to find its
+configuration file, hmailer.cf.  Most systems with HMAILER set
+will have hmailer.cf and HMailer.exe in the same directory.  If you use
+an hmailer.cf configuration file that is not in the same directory as
+HMailer.exe, then you MUST override this as specified in the
+Configuration section below.
+
+Configuration
+=============
+The HMailer class has several member variables used for general
+configuration not specific to individual e-mail messages.
+
+$exefile
+--------
+Specifies the full path and file name of HMailer.exe.  If set to an empty
+string, the HMAILER environment variable is used instead.  Note that
+$exefile specifies both path and file name.  In contrast, the HMAILER
+environment variable only specifies the path and the HMailer class assumes
+the file name 'HMailer.exe'.  See the Environment Variables section above.
+
+$tmpdir
+-------
+The HMailer class needs to pass some information to HMailer.exe by
+means of temporary files.  $tmpdir specifies the directory to
+be used for these files.  If set to an empty string, then one of the
+environment variables TMPDIR, TMP, or TEMP (the first of these found)
+will be used instead.  See the Environment Variables section above.
+
+$default_subject
+----------------
+This is the default subject to be used if not the subject is not otherwise
+specified.  If $default_subject is an empty string and the message
+subject is not otherwise specified, then the Subject: header will not
+be included in the message.
+
+$default_to
+-----------
+This is the default To: line if all recipients are Cc: and Bcc:
+recipients.  It should be in paraentheses so as not to be interpreted
+as an e-mail address by mail systems.
+
+Example
+-------
+You can and perhaps should do your configuration in a subclass.  An
+example would be:
+
+  include( 'hmailer.php' );
+  class Local_HMailer extends HMailer
+  {
+     var $exefile = 'C:\InetMail\bin\HMailer.exe';
+     var $tmpdir  = 'C:\tcpip\temp';
+     var $default_subject = '(Oops, I forgot the subject)';
+  }
+
+Semi-Private Member Variables
+=============================
+The following member variables are primarily intended to be used
+internally by the HMailer class, but can be set to directly.
+
+$subject
+--------
+The subject for your e-mail message (without the leading "Subject: ").
+
+$message
+--------
+No longer used.  See $mainbody below for replacement.
+
+$mainbody
+---------
+The main message body for your e-mail message.  Replaces the former
+$message variable.
+
+$headers
+--------
+Additional headers not otherwise supported by the HMailer classe.
+ABSOLUTELY NO SAFETY OR OTHER VALIDITY CHECKS ARE PERFORMED.  This header
+information MUST be a concatenation of strings each of which is of the
+format "Header-Name: Header value\n".  The headers appearing here will
+appear last in the message.
+
+You may wish to use Reply-To:, MIME-Version:, Content-Type:, or other
+headers.  Please make sure that you know what you are doing if you do
+this.
+
+Private Member Variables
+========================
+The following member variables are used internally by the HMailer
+class and should be considered private.
+
+$to
+$cc
+$bcc
+$from
+$replyto
+-----
+The first three specify the To:, Cc:, and Bcc recipients.  The other two
+specify the sender and the Replyto: address.  These are all hash arrays
+taking e-mail address as keys and real names as values.  If a value is
+set to an empty string, the e-mail address will be used as the real name.
+
+If the $to and $cc arrays are empty, then no recipient information will
+appear in the message headers.  The real name information in the $bcc
+array is ignored.
+
+If all recipient arrays are empty, then the e-mail message will not be
+sent.  Additionally, the message will not be sent if the $from array
+is empty.
+
+No more than one $from address and one $replyto address will be used.
+If one of these arrays have more than one element, it is not
+predictable which one will be used.
+
+Public Member Functions
+=======================
+The following member functions are public.
+
+setspec( $specarray=false )
+---------------------------
+Sets up the message specific parameters.
+
+$specarray is a hash array where the following keys are valid.
+
+   'to'       -- a hash array, the primary recipients
+   'cc'       -- a hash array, the carbon copy recipients
+   'bcc'      -- a hash array, the blind carbon copy recipients
+   'from'     -- a hash array, the message sender
+   'replyto'  -- a hash array, the reply to address
+   'subject'  -- a string, the message subject
+   'mainbody' -- a string, the main message body
+   'message'  -- depricated synonym for 'mainbody'
+   'headers'  -- a string, additional message headers
+   'parts'    -- a scalar array, the attachments
+
+The for hash arrays all take e-mail address as keys and real names
+as values.  There can be only one sender.  If you sepecify more than
+one sender for the 'from' or more than one reply to address for the
+'replyto' array, it is unpredictable which of these will be used.
+
+Any information provided will overwrite (not add to) previously supplied
+information.  If called called without the optional $specarray parameter,
+then all message specific information will be cleared.
+
+See below for a description of the 'parts' array.
+
+Example:
+    $h->setspec( array( 
+          'to'       => array(
+                          'me@foobar.com' => 'John Doe',
+                          'myself@snafu.com' => 'Mary Rowe',
+                          'i@glitch.com' => 'G. I. Joe'
+                        ),
+          'cc'       => array(),
+          'from'     => array( 
+                          'webmaster@masterweb.com' => 'The Wizard of Web'
+                        ),
+          'mainbody' => 'You password as expired.'
+    );
+     
+This example sets up a message with three primary recipients and no carbon
+copy recipients.  Any previous blind carbon copy and subject information
+will be retained.  Previous sender and extra header information is
+also retained.
+
+An e-mail with attachments will have a 'parts' array where with element
+representing one attachement.  These elements are hash arrays with the
+following keys.
+
+   'maintype'    -- the primary part of the content's MIME type
+   'subtype'     -- the secondary part of the content's MIME type
+   'tyeparams'   -- hash array for content type parameters
+   'description' -- a description of the attachment
+   'encoding'    -- the encoding method to be used
+   'content'     -- the attachment content
+
+The attachemt's MIME type will be maintype/subtype.  Some MIME types have
+parameters.  These can optionally be specified in 'typeparams' where the
+parameter name is the hash key and the parameter value is the hash value.
+A particularly useful typeparams is array( 'name' => 'my_file_name' ).
+
+The following MIME types (with or without parameters) are supported:
+
+   text/*
+   image/*
+   audio/*
+   application/*
+   
+were the '*' is a wildcard for any subtype.  You are responisble for
+making sure you have a valid MIME type.
+
+The MIME specification allows a description header; this can be
+specified in 'description'.  In reality, almost no e-mail clients show
+the description.  It is not necessary to specify a description.
+
+The following encodings are supported:
+
+   7bit
+   8bit
+   base64
+
+The encoding should be 7bit or 8bit for text/* attachemnts and
+'base64' for image/*, audio/*, and application/* attachemnts.
+Although technically within the MIME specs, it is seriously bad to to
+use anything but base64 for anything other than text/* attachements.
+The only encoding done by the hmailer class is base64.  If you specify
+7bit encoding, you are responsible for making sure the content is
+really 7bit clean.  If you specify 7bit or 8bit encoding, you are
+responsible for making sure that it really is text and not something
+that will screw up mail systems.
+
+Note that that quoted-printable encoding is not supported.  I haven't
+programmed this yet because I haven't had a need for it.  Maybe next
+version.
+
+It is not necessary to specify an encoding.  If no encoding is specified,
+none will be used for text/* attachements, and base64 will be used for
+image/*, audio/*, and application/* attachements.
+
+The 'content' value should be a string, possibly the contents of a
+binary file.
+
+Note that sending attachments is an inherently slow process, especially
+when sending to mutiple recipients.  You may run up against your PHP
+max_execution_time setting.
+
+Example with attachments:
+    $h->setspec( array( 
+          'to'      => array(
+                         'me@foobar.com' => 'John Doe',
+                         'myself@snafu.com' => 'Mary Rowe',
+                         'i@glitch.com' => 'G. I. Joe'
+                       ),
+          'cc'      => array(),
+          'from'    => array( 
+                         'webmaster@masterweb.com' => 'The Wizard of Web'
+                       ),
+          'message' => 'You password as expired.',
+          'parts'   => array(
+                         array(
+                           'maintype' => 'text',
+                           'subtype'  => 'html',
+                           'typeparams' => '',
+                           'description' => 'HTML version of message',
+                           'encoding' => '8bit',
+                           'content' => $my_htmlized_message
+                         ),
+                         array(
+                           'maintype' => 'image',
+                           'subtype'  => 'png',
+                           'typeparams' => array(
+                             'name' => $my_png_filename
+                           ),
+                           'description' => 'A pretty picture',
+                           'encoding' => 'base64',
+                           'content' => $my_png_file_content
+                         )
+                       );
+    );
+     
+
+Example, resets all specs:
+   $h->setspec();
+
+Here, all previous e-mail specific information is cleared.
+
+Return codes are:
+     0 -- Success.
+    -1 -- One of the To: recipients was invalid.
+    -2 -- One of the Cc: recipients was invalid.
+    -3 -- One of the BCC recipients was invalid.
+    -4 -- The sender or replyto address was invalid.
+
+For a description of the validity checks, see the Warning section
+above.
+
+
+
+add_to( $addr, $name='')
+add_cc( $addr, $name='')
+add_bcc( $addr, $name='')
+-------------------------
+These add one recipient to the To:, Cc:, and Bcc lists respectively.
+$addr is the e-mail address and $name is the real name.  If $name is not
+specified, the e-mail address will be used as the real name.  Notice that
+these ADD a recipient to the appropriate list; names specified previously
+with add_to() etc. or with setspec() are retained.  This is in contrast
+to setspec() with replaces previous information.
+
+These functions return true on success or false if the validity check
+failed.  For a description of the validity checks, see the Warning section
+above.
+
+set_form( $addr, $name='')
+set_replyto( $addr, $name='')
+-----------------------------
+Replaces the sender or replyto e-mail address.  The parameters are the
+same as for add_to(), etc.
+
+These functions return true on succes or false if the validity check
+failed.  For a description of the validity checks, see the Warning section
+above.
+
+set_subject( $subj='' )
+set_mainbody( $mb='' )
+-----------------------
+Replaces the subject or main message body.  In each case, the
+parameter is a string.  Both functions return true.
+
+mail_separate( $specarry )
+--------------------------
+This sends the e-mail message.  The $specarray parameter is the same as
+for the mail() method below.  It differs from mail() only when there
+are multiple recipients.  For multiple recipients, mail_separate()
+calls hmailer.exe separately for each recipient where mail() includes all
+recipients in one list passed to a single execution of hmailer.exe.
+
+Note.  If sending attachments, especially to multiple recipients, you
+may run up against your PHP max_execution_time limit.  If you use
+mail_separate() and your script times out, not all recipients will get
+the message.  In this case, using mail() is safer.  Your script will
+still time out, but all your recipients will get your e-mail.
+
+mail( $specarray = false )
+--------------------------
+This sends the e-mail message.  A the optional $specarray parameter is
+as in setspec().  However, the behavior if $specarray is not specified
+differs from setspec().  Here, if $specarray is not specified, then
+whatever pre-existing e-mail information is used.  This is in contrast
+to setspec() which clears out all message specific information if
+$specarray is not speicified.
+
+mail() returns 0 on success, a positive number on failure by HMailer.exe,
+or a negative number if a failure occured before HMailer.exe was called.
+
+A return of 255 comes from the operating system and should indicate
+that HMailer.exe either was not found or failed to run.  Smaller
+positive returns come from HMailer.exe itself.  According to the
+HMailer.exe documentation, these are:
+     1 -- Incorrect number of arguments.
+     2 -- Socket services not available.
+     3 -- Name file missing.
+     4 -- Message file missing.
+     5 -- Timeout.
+
+Negative returns indicate that the HMailer class did not attempt to
+run HMailer.exe.  Error codes are:
+    -1 -- One of the To: recipients was invalid.
+    -2 -- One of the Cc: recipients was invalid.
+    -3 -- One of the BCC recipients was invalid.
+    -4 -- The sender was invalid.
+    -5 -- HMailer.exe was not specified in the $exefile member variable.
+    -6 -- No temp directory was specified in the $tmpdir member variable.
+    -7 -- The main message body is empty.
+    -8 -- The message has no sender.
+    -9 -- The message has no recipient.
+   -10 -- The temporary recipient file could not be opened.
+   -11 -- The temporary message file could not be opened.
+
+Private Member Functions
+========================
+The following member functins are used internally by the HMailer
+class and should be considered private.
+
+mk_addrname( $addr, $name )
+---------------------------
+Intended as a private function used internally by the HMailer class.
+
+Returns a string in the form "\"$name\" <$addr>" to be used in a
+sender or recipient header.  Overwrite in a subclass if you prefer
+simple addresses in your headers or if you prefer the less commonly
+used "$addr ($name)" format.
+
+chk_addr( $addr )
+-----------------
+Intended as a private function used internally by the HMailer class.
+
+Perform some simple safety check for e-mail addresses.  See the Warning
+section above for more details.  Returns $addr if okay or false otherwise.
+Override in a subclass to perform better checking.
+
+chk_name( $name )
+-----------------
+Intended as a private function used internally by the HMailer class.
+
+Perform some simple safety check for e-mail names.  See the Warning
+section above for more details.  If okay, returns $name with single
+and double quotes backslashed; returns fals otherwise.  Override in a
+subclass to perform better checking.
+
+encodeqp( $textstr )
+encode64( $binstr )
+--------------------
+Performs quoted-printable (encodeqp()) or base64 (encode64()) encoding.
+Note that encodeqp is merely a stub and doesn't really do anything.
+mk_allparts()  A future version of hmailer may support
+quoted-printable encoding.
+
+mk_allparts()
+mk_onepart( &$part )
+--------------------
+Processes attachments for the e-mail message.  mk_allparts() calls
+mk_onepart() once for each attachment.
+
+
+mk_datestamp( $datestamp='' )
+-----------------------------
+Makes and returns an e-mail date stamp using current date and time.
+If $datestamp is specified, a new datestamp is not made; $datestamp is
+merely returned.

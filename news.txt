@@ -1,0 +1,41 @@
+News file for hmailer.php, 2.0.
+
+A few unnumbered versions of my HMailer class were mailed out
+privately.  These should be considered 1.x versions.
+
+Version 2.1 changes
+
+  Bugfixes only, mostly in attachment handling.
+
+Version 2.0 changes
+
+  E-mail attachemnts are now supported.  The Content-Transfer-Encoding's
+  supported are 7bit, 8bit, and base64.  No actual encoding is done for
+  7bit or 8bit.  In particular, it is up to the calling program to make
+  sure that a 7bit attachment really is 7-bit clean.  WARNING.  Sending
+  e-mail with attachments can be slow, especially when you have multiple
+  recipients.  You may extend beyond your PHP max_execution_time setting.
+
+  The semi-private member variable 'message' has been renamed to
+  'mainbody'.  The name 'mainbody' is used for the main part of an
+  e-mail message, the part that's readable when you open the message
+  in your e-mail client and which does not include the attachements.
+  The name 'message' is used for the entire message as sent including
+  attachments.  Previously, e-mail attachments were not supported.
+
+  The $specarray parameter used by the mail() and setspec() methods
+  was always a hash array.  It now supports the following new keys:
+
+     'replyto'  --  Specifies the Replyto: address
+     'parts'    --  A scalar array of attachments
+     'mainbody' --  The main message body.
+  
+  The 'mainbody' key is intended to replace the 'message' key.
+  The 'message' key is retained as a synonym for 'message' but is now
+  depricated.
+
+  The Replyto: header is now supported in the same fashion as the
+  From: header.
+
+  A new member variable has been added:  $this->version' holds the
+  version number.
